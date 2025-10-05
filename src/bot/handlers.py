@@ -1,8 +1,8 @@
 import httpx
 from telegram import Update
 from telegram.ext import ContextTypes
-from config import OPENROUTER_API_KEY, OPENROUTER_API_ENDPOINT, headers
-from bot.utils import encode_bytes_to_base64
+from src.config import OPENROUTER_API_KEY, OPENROUTER_API_ENDPOINT, headers
+from src.bot.utils import encode_bytes_to_base64
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print("Received /start command")

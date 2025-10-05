@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 import os
-from bot.utils import get_model_list
+from src.bot.utils import get_model_list
 
 # Load variables from .env file
 load_dotenv()

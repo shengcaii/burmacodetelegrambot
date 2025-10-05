@@ -1,7 +1,7 @@
 from telegram import Update
 from fastapi import FastAPI, Request
 from contextlib import asynccontextmanager
-from bot.application import application  # Import your PTB Application
+from .bot.application import application  # Import your PTB Application
 
 app = FastAPI()
 

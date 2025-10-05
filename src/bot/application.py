@@ -1,6 +1,6 @@
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters
-from .handlers import start, handle_text, handle_photo, unknown_command, debug_all, error_handler
-from config import BOT_TOKEN
+from src.bot.handlers import start, handle_text, handle_photo, unknown_command, debug_all, error_handler
+from src.config import BOT_TOKEN
 
 if BOT_TOKEN is None:
     raise ValueError("BOT_TOKEN is not set in the environment.")
