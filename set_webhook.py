@@ -13,10 +13,10 @@ if not BOT_TOKEN or not WEBHOOK_URL:
 
 set_webhook_url = f"https://api.telegram.org/bot{BOT_TOKEN}/setWebhook"
 get_webhook_info_url = f"https://api.telegram.org/bot{BOT_TOKEN}/getWebhookInfo"
-webhook_endpoint = f"{WEBHOOK_URL}/webhook"
 
-response = requests.get(set_webhook_url, params={"url": webhook_endpoint})
-print(response.json())
-# print(f"Webhook set to: {webhook_endpoint}")
+# response = requests.get(set_webhook_url, params={"url": WEBHOOK_URL})
+# print(response.json())
+
+print(f"Webhook set to: {WEBHOOK_URL}")
 info_response = requests.get(get_webhook_info_url)
 print("Current webhook info:", info_response.json())

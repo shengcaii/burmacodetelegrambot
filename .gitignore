@@ -10,3 +10,6 @@ wheels/
 .venv
 
 /.env
+
+/tests
+load_test_bot.py
