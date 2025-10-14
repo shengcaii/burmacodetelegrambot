@@ -13,6 +13,8 @@ OPENROUTER_API_ENDPOINT = os.getenv("OPENROUTER_API_ENDPOINT", "https://openrout
 ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
 RBG_API_KEY = os.getenv("API_KEY")
 
+DB_URI = os.getenv("DB_URI", "mongodb://localhost:27017")
+
 
 headers = {
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",

@@ -10,6 +10,6 @@ wheels/
 .venv
 
 /.env
-
-/tests
-load_test_bot.py
+# To track test files, you can remove the lines below
+# /tests
+# load_test_bot.py

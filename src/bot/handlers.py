@@ -1,9 +1,12 @@
 import httpx
 import logging
 import io
+import asyncio
 from telegram import Update
 from telegram.ext import ContextTypes
 from src.config import OPENROUTER_API_ENDPOINT, headers, LLM_MODELS, RBG_API_KEY, SYSTEM_MESSAGE
+from src.database.user_db import update_or_create_user
+from src.database.chat_history_db import get_user_history, add_message_to_history
 from src.bot.utils import encode_bytes_to_base64, try_models
 
 # Set up basic logging
@@ -13,9 +16,12 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.message:
-        #TODO 
-        first_name = update.effective_user.first_name if update.effective_user else ""
+    user = update.effective_user
+    if update.message and user:
+        # Run the synchronous database call in a separate thread
+        await asyncio.to_thread(update_or_create_user, user)
+
+        first_name = user.first_name
         await update.message.reply_text(
             f"Hello {first_name}! Thanks for reaching out. How can I assist you today?"
             "\n\nYou can type /help to see what I can do!"
@@ -40,21 +46,25 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # The MessageHandler with filters.TEXT ensures message and message.text exist.
+    user = update.effective_user
     message = update.effective_message
-    if not message or not message.text:
+    if not user or not message or not message.text:
         return # Should not happen with correct filters, but good for safety
 
     # Send a placeholder message that we can edit later
     thinking_message = await message.reply_text("Thinking...")
 
-    # Simplified history management
-    user_history = context.user_data.setdefault("history", []) if context.user_data else []
+    # 1. Fetch recent history from the database
+    user_history = await asyncio.to_thread(get_user_history, user.id)
 
-    # Prepend system message if history is new
-    if not user_history:
-        user_history.append(SYSTEM_MESSAGE)
-
+    # 2. Add system message and current user message
+    # Prepending the system message ensures the LLM follows instructions
+    user_history.insert(0, SYSTEM_MESSAGE)
     user_history.append({"role": "user", "content": message.text})
+
+    # 3. Save the user's new message to the database in the background ("fire-and-forget").
+    # This allows us to call the LLM immediately without waiting for the database write.
+    asyncio.create_task(asyncio.to_thread(add_message_to_history, user.id, "user", message.text))
 
     payload = {"messages": user_history}
 
@@ -67,7 +77,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
     if result:
-        user_history.append({"role": "assistant", "content": result})
+        # The assistant's response is no longer saved to the database.
         await thinking_message.edit_text(result)
     else:
         # If all models failed, inform the user by editing the placeholder message.
